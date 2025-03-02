@@ -1,0 +1,36 @@
+{
+  "name": "template-express-live-reload",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "nodemon -e js,ejs,json,css ./bin/www",
+    "watch": "webpack --watch"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-handlebars": "^8.0.1",
+    "hbs": "^4.2.0",
+    "http": "^0.0.1-security",
+    "http-errors": "~1.6.3",
+    "jquery-circle-progress": "^1.2.2",
+    "morgan": "~1.9.1",
+    "mqtt": "^5.10.4",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.6",
+    "babel-loader": "^8.2.5",
+    "connect-livereload": "^0.6.1",
+    "css-loader": "^6.7.1",
+    "dotenv": "^16.0.1",
+    "livereload": "^0.9.3",
+    "nodemon": "^2.0.16",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.9.2"
+  }
+}

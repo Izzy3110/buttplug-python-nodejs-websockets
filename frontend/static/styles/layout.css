@@ -1,0 +1,141 @@
+/* Default Light Mode */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+    color: #000000;
+    }
+
+    .container-fluid {
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-height {
+        min-height: 6vh; /* Maintains minimum height of 6vh */
+        display: flex;    /* Enable flexbox */
+        justify-content: center;  /* Horizontally center the content */
+        align-items: center;      /* Vertically center the content */
+        text-align: center;       /* Optionally, you can add this to make the text center aligned */
+    }
+
+    /* Ensure that the main section takes up the full available height */
+    main {
+        display: flex;       /* Use flexbox to make the container fluid fill available space */
+        flex-direction: column; /* Stack elements vertically */
+        height: 100%;        /* Make the main element fill the full viewport height */
+        margin: 0;           /* Remove any default margin */
+        padding: 0;          /* Remove any default padding */
+    }
+
+    /* Remove any space between the main and container-fluid */
+    .container-fluid {
+        flex-grow: 1;        /* Allow the container to take the available space inside the main */
+        padding: 0;          /* Remove any default padding in container */
+        margin: 0;           /* Remove any margin */
+    }
+
+
+    .no-bottom-padding {
+        padding-bottom: 0;
+    }
+    .no-bottom-margin {
+        margin-bottom: 0;
+    }
+
+    .footer-top-margin {
+        margin-top: .5rem;
+    }
+
+    .error-top-container {
+        background: #753030e6;
+        padding: 1rem;
+    }
+
+    #devices-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      h1.devices_headline {
+        text-shadow: 1px 2px black; 
+        color: #726eff;
+      }
+      
+      .device-card {
+        border: 1px solid #ccc;
+        padding: 15px;
+        border-radius: 8px;
+        width: 250px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        background: #222;
+      }
+      
+      .device-card h3 {
+        margin-top: 0;
+        font-size: 18px;
+      }
+      
+      .device-card p {
+        margin: 5px 0;
+      }  
+      
+
+    /* Dark Mode */
+    @media (prefers-color-scheme: dark) {
+    body {
+        background-color: #121212;
+        background: #190029;
+        color: #ffffff;
+    }
+
+    .navbar {
+        background-color: #1e1e1e !important;
+    }
+
+    .navbar-light .navbar-brand,
+    .navbar-light .nav-link {
+        color: #ffffff !important;
+    }
+
+    .jumbotron {
+        background-color: #040404 !important;
+        color: #fff;
+    }
+
+    footer {
+        background-color: #1e1e1e;
+        color: #ffffff;
+    }
+
+    /* Fix Hamburger Icon in Dark Mode */
+    .navbar-light .navbar-toggler {
+        color: rgba(255, 255, 255, 0.75) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    .navbar-light .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba(255,255,255,0.75)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
+    }
+    }
+
+    /* Sticky footer only on desktop */
+    @media (min-width: 992px) {
+    main {
+        flex: 1;
+    }
+    footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 1000;
+    }
+    
+    footer-top-margin {
+        margin-top: 0;
+    }
+    }

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head'); %>
+  <script src="/jquery-circle-progress/dist/circle-progress.min.js"></script>
+  <link rel="stylesheet" href="/styles/layout.css">
+
+  <script>
+    const socket = new WebSocket('ws://localhost:3000');
+
+    let battery_intervals = {}
+
+    function getCurrentDateTime() {
+      const now = new Date();
+      
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+      const year = now.getFullYear();
+      
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+  }
+
+  function vibrate(element) {
+      $(element).animate({ left: '-2px' }, 150)
+      window.setTimeout(function() {
+        $(element).animate({ left: '2px' }, 150, vibrate(element));
+      },10)
+                      
+  }
+
+    function populateDevices(data) {
+      // Clear the existing content inside the container
+      $('#devices-container').empty();
+
+      // Loop through each device in the data
+      $.each(data, function(key, device) {
+        // Create a new card for each device
+        const card = $('<div>').addClass('device-card');
+
+        // Create a progress circle for battery level
+        const progressCircle = `<div data-id="circle" data-uuid="${device.uuid}"></div>`;
+
+        // Calculate the stroke-dashoffset based on battery level (range: 0 - 100)
+        const batteryLevel = device.battery.level;
+        let batteryLevel_perc = batteryLevel / 100
+
+        $(card).attr('data-uuid', device.uuid)
+
+        // Populate the card with device information
+        const cardContent = `
+          <h3>${device.name}</h3>
+          <div class="device-battery">${progressCircle}</div>
+          <p><strong>Battery Level:</strong> <span data-id="battery_level_percentage">${batteryLevel}%</span></p>
+          <p><strong>Last Battery Check:</strong><br /><span data-id="last_battery_check">${device.battery.last_check}</span></p>
+          <p><strong>UUID:</strong><br />${device.uuid}</p>
+          <p><strong>Last Connected:</strong><br />${device.last_connected}</p>
+        `;
+        
+        
+
+        // Set the content and append the card
+        card.html(cardContent);
+        $('#devices-container').append(card);
+
+        $("div[data-id='circle'][data-uuid='"+device.uuid+"']").circleProgress({
+          value: batteryLevel_perc,
+          size: 80,
+          animation: false,
+          fill: {
+            gradient: ["blue", "lightblue"]
+          }
+        });
+
+        battery_intervals[device.uuid] = window.setInterval(function() {
+            socket.send(JSON.stringify({"target": "battery_level", "device_uuid": device.uuid}))
+        }, 3000)
+      });
+
+    }
+      let vibration_element = null
+      $(document).ready(function() {
+        window.setInterval(function() {
+          let devices_divs = $("#devices-container").find($("div[class='device-card']"))
+          if(devices_divs.length == 1) {
+            let device_div = $(devices_divs[0])
+            vibration_element = device_div
+          }
+        }, 3000)
+        
+
+        let vibrating;
+
+          $("#startVibrate").click(function () {
+              if (!vibrating) {
+                if(vibration_element != null) {
+                  console.log(vibration_element)
+                  console.log("start")
+                  $(vibration_element).css({
+                    "position": "relative"
+                  })
+                  vibrating = true;
+                  vibrate(vibration_element);
+                }
+              }
+          });
+
+          $("#stopVibrate").click(function () {
+              
+              if(vibration_element != null) {
+                console.log(vibration_element)
+                console.log("stop")
+                $(vibration_element).css({
+                    "position": ""
+                  })
+                vibrating = false;
+                $(vibration_element).stop(true).css("left", "0px");
+              }
+              
+          });
+
+      })
+    
+    socket.onopen = function() {
+      console.log('WebSocket connection opened.');
+      socket.send(JSON.stringify({"devices": []}));
+    };
+  
+    socket.onmessage = function(event) {
+      // console.log('Message from server: ', event.data); 
+      try {
+        let data = JSON.parse(event.data)
+        if(Object.keys(data).includes("target")) {
+          if(data["target"] == "devices") {
+            console.log("is devices")
+            let device_uuids = []
+            Object.keys(data["data"]).forEach((element) => {
+              device_uuids.push(data["data"][element]["uuid"])
+            })
+            $.each(Object.keys(battery_intervals), function(index, element) {
+              if($.inArray(element, device_uuids) == -1) {
+                let current_interval = battery_intervals[element]
+                window.clearInterval(current_interval)
+              }
+              
+            })
+            populateDevices(data["data"]);
+          }
+          if(data["target"] == "battery_level_result") {
+            let device_uuid = data["data"]["uuid"]
+            // console.log(`device-uuid: ${device_uuid}`)
+            let battery_level = data["data"]["level"]
+            let batteryLevel_perc = battery_level / 100
+
+            let element = $("div[data-uuid='"+device_uuid+"']")
+            if(element) {
+              let span_battery_level_percentage = $(element).find($("span[data-id='battery_level_percentage']"))
+              let old_percentage_str = $(span_battery_level_percentage).html()
+              let new_percentage_str = battery_level+"%"
+              if(old_percentage_str != new_percentage_str) {
+                $(span_battery_level_percentage).html(new_percentage_str)
+              }
+
+              let span_last_battery_check = $(element).find($("span[data-id='last_battery_check']"))
+              let last_check_str = data["data"]["last_check"] == "" ? getCurrentDateTime() : data["data"]["last_check"]
+              $(span_last_battery_check).html(last_check_str)
+              let div_circle = $(element).find($("div[data-id='circle'][data-uuid='"+device_uuid+"']"))
+              var value = $(div_circle).circleProgress('value'); // 0.5
+                
+              if(value != batteryLevel_perc) {
+                $(div_circle).circleProgress({
+                  value: batteryLevel_perc,
+                  size: 80,
+                  fill: {
+                    gradient: ["blue", "lightblue"]
+                  }
+                });
+              }
+            }
+
+          }
+        }
+        
+      } catch (e) {
+
+      }
+      
+    };
+  
+    socket.onclose = function() {
+      console.log('WebSocket connection closed.');
+    };
+    
+  </script>
+  
+</head>
+<body class="container-fluid">
+
+  <header>
+    <%- include('partials/header'); %>
+  </header>
+
+  <main>
+    <div class="container-fluid">
+      <button id="startVibrate">Start</button>
+      <button id="stopVibrate">Stop</button>
+      <%- content %>  <!-- Dynamic content goes here -->
+    </div>
+  </main>
+
+  <footer class="footer-height footer-top-margin">
+    <%- include('partials/footer'); %>
+  </footer>
+
+</body>
+</html>

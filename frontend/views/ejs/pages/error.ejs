@@ -1,0 +1,11 @@
+<% var content = '<div class="container-fluid">' +
+    '<div class="container-fluid error-top-container">' + 
+    '<h1>Error</h1>' +
+    '<p>Unfortunately, this page cannot be displayed without errors...</p>' +
+    '</div>' +
+    '<div class="jumbotron">' + error_message + '</div>' +
+    '</div>'; %>
+    
+
+<%- include('../layout', { content: content }) %>
+
