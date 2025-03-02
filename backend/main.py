@@ -313,12 +313,9 @@ async def main():
         websocket_client(),
         check_battery_levels(client),
     ]
-    # manage_mqtt()
-    # simulate_incoming_messages()
+
     await asyncio.gather(*tasks)
-    await asyncio.sleep(1)
-    # asyncio.create_task(websocket_client())  # Start WebSocket client
-    # asyncio.create_task(simulate_incoming_messages())  # Simulate message input
+
     while True:
         await asyncio.sleep(60)  # Keep the main task alive
 
